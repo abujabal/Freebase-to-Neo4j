@@ -12,5 +12,5 @@
 
             mvn package
 
-3. run code by invoking the Main class and passing the path to Freebase dump as well as a directory to store Neo4j db
+3. Run code by invoking the Main class and passing the path to Freebase dump as well as a directory to store Neo4j db
             
