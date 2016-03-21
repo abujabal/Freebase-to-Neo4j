@@ -1,5 +1,5 @@
 
-# Freebase to Neo4j Graph database loader
+# Freebase to Neo4j Graph Database Loader
 
 
 ## Easy setup
