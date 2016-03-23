@@ -1,4 +1,4 @@
-package de.mpii.d5.neo4j;
+package main.java.de.mpii.d5.neo4j;
 
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.DynamicRelationshipType;
@@ -25,7 +25,6 @@ import java.util.Map;
  *  @version 1.0
  */
 
-//consider adding types as labels, watch out . in types you might need to use ``
 
 public class Neo4jBatchHandler {
   private int totalTriples = 0;
