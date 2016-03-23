@@ -1,6 +1,10 @@
 
 # Freebase to Neo4j Graph Database Loader
 
+## Freebase dump used is based on: 
+            https://github.com/percyliang/sempre
+
+It is a canonicalized and scaled down dump
 
 ## Easy setup
 
