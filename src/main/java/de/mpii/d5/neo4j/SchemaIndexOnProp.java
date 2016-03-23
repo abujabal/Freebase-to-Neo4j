@@ -1,4 +1,4 @@
-package de.mpii.d5.neo4j;
+package main.java.de.mpii.d5.neo4j;
 
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 public class SchemaIndexOnProp {
 
   /**
-   * create index over a particular property of a node. To able to do this, 
+   * create index over a particular property of a node (__MID__ in our case). To able to do this, 
    * a node must have a label e.g., Entity in our case
    * @param path
    *            neo4j database path
@@ -44,7 +44,7 @@ public class SchemaIndexOnProp {
   public static void main(String[] args) {
     if (args.length < 1) {
       System.err
-      .println("Usage: de.mpii.d5.neo4j.CreateSchemaIndexOnProp noe4jDatabaseDir");
+      .println("Usage: de.mpii.d5.neo4j.CreateSchemaIndexOnProp neo4jDatabaseDir");
     }
     String databaseDir = args[0];
     SchemaIndexOnProp.create(databaseDir);
