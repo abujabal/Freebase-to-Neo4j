@@ -1,4 +1,4 @@
-package de.mpii.d5.neo4j;
+package main.java.de.mpii.d5.neo4j;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

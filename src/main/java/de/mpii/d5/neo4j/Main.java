@@ -1,4 +1,4 @@
-package de.mpii.d5.neo4j;
+package main.java.de.mpii.d5.neo4j;
 
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
