@@ -29,7 +29,7 @@ public class Main {
     try {
       // set these configuration based on the size of your data
       Map<String, String> config = new HashMap<String, String>();
-      config.put("dbms.pagecache.memory", "70G");
+      config.put("dbms.pagecache.memory", "70g");
       config.put("cache_type", "none");
       config.put("use_memory_mapped_buffers", "true");
       config.put("neostore.nodestore.db.mapped_memory", "10g");
@@ -42,7 +42,9 @@ public class Main {
       db = BatchInserters.inserter(databaseDir, config);
       Neo4jBatchHandler handler = new Neo4jBatchHandler(db);
       handler.createNeo4jDb(freebasePath, numberOfTriples);
-
+      System.out.println("Shutting down");
+      db.shutdown();
+      System.out.println("Shut down complete");
     } catch (Exception e) {
       e.printStackTrace();
     } finally {

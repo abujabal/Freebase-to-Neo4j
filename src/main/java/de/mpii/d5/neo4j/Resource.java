@@ -36,7 +36,7 @@ public class Resource {
     if (this.getValue().contains(":")) {
       int endIndex = this.getValue().indexOf(':');
       this.prefix = this.getValue().substring(0, endIndex);
-      this.id = this.getValue().substring(endIndex + 1, this.getValue().length());
+      this.id = this.getValue().substring(endIndex + 1, this.getValue().length() - 1);
     }
   }
   /**
@@ -75,5 +75,12 @@ public class Resource {
   
   public String getPrefix() {
     return prefix;
+  }
+
+  public long getHash() {
+    long hash = getId().hashCode();
+    if(hash < 0)
+      hash += Integer.MAX_VALUE;
+    return hash;
   }
 }
