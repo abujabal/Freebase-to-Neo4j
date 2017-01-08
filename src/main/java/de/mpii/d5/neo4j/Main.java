@@ -14,7 +14,7 @@ public class Main {
    */
   public static void main(String[] args) {
     if (args.length < 2) {
-      System.err.println("Usage: main.java.de.mpii.d5.neo4j freebasePath "
+      System.err.println("Usage: main.java.de.mpii.d5.neo4j.Main freebasePath "
           + "neo4jDatabaseDir [#triples]");
     }
 
