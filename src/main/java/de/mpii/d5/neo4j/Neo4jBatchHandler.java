@@ -47,7 +47,7 @@ public class Neo4jBatchHandler {
   }
 
   /**
-   * create noe4j database
+   * Creates noe4j database.
    * @param path
    *            Freebase triples path
    * @param numberOfTriples number of Freebase triples to read
@@ -61,6 +61,7 @@ public class Neo4jBatchHandler {
       BufferedReader br = new BufferedReader(new InputStreamReader(
           new FileInputStream(path), "UTF-8"));
 
+      line = br.readLine();
       line = br.readLine();
       while (line != null) {
         count++;
@@ -82,9 +83,9 @@ public class Neo4jBatchHandler {
           // entity, example: fb:m.0n7x41f
           objectResource.setValues();
         } else {
-            // literal
+          // literal
           literalObject = true;
-          val = objectResource.handleLiteral();
+          val = objectResource.normalizeLiteral();
         }
         // predicate resource
         String predicateStr = fields[1];
@@ -130,23 +131,120 @@ public class Neo4jBatchHandler {
   }
 
   /** 
-   * store literal value as property of the subject node
+   * Stores literal value as property of the subject node. If the property has multiple values,
+   * it will be stored as an array.
    * @param subId subject id
-   * @param r resource object
+   * @param r resource predicate
    * @param val literal value
    */
   private void insertLiteralValueAsProp(Long subId, Resource r, String val) {
+    String value = val.split(":@:")[0];
+    String type = val.split(":@:")[1];
+    boolean boolVal = false;
+    long longVal = 0;
+    double doubleVal = 0.0;
+    Object objVal = null;
+    if (type.equals("boolean")) {
+      boolVal = Boolean.parseBoolean(value);
+      objVal = boolVal;
+    } else if (type.equals("double")) {
+      doubleVal = Double.parseDouble(value);
+      objVal = doubleVal;
+    } else if (type.equals("int") || type.equals("datetime")) {
+      longVal = Long.parseLong(value);
+      objVal = longVal;
+    } else {
+      objVal = value;
+    }
     Map<String, Object> nodeProps = propsMap.get(subId);
     if (nodeProps == null) {
       nodeProps = new HashMap<String, Object>();
       propsMap.put(subId, nodeProps);
     }
-    nodeProps.put(r.getId(), val);
+    // create array of values for the property if needed
+    Object existingValues = nodeProps.get(r.getId());
+    Object dataToInsert = null;
+    if (existingValues == null) {
+      // thus far, this property has only one value. No array is needed
+      nodeProps.put(r.getId(), objVal);
+    } else {
+       // this property has more than one value. Array is needed.
+      if (type.equals("boolean")) {
+          // check whether existingValues is a primitive type or an array
+        if (existingValues instanceof Boolean) {
+          boolean[] boolValues = new boolean[2];
+          boolValues[0] = (Boolean)existingValues;
+          boolValues[1] = (Boolean)objVal;
+          dataToInsert = boolValues;
+        } else {
+          // array of boolean
+          boolean[] boolExisting = (boolean[])existingValues;
+          boolean[] boolValues = new boolean[boolExisting.length + 1];
+          for (int i = 0; i < boolExisting.length; i++) {
+            boolValues[i] = boolExisting[i];
+          }
+          boolValues[boolValues.length - 1] = (Boolean)objVal;
+          dataToInsert = boolValues;
+        }
+      } else if (type.equals("double")) {
+        // check whether existingValues is a primitive type or an array
+        if (existingValues instanceof Double) {
+          double[] doubleValues = new double[2];
+          doubleValues[0] = (Double)existingValues;
+          doubleValues[1] = (Double)objVal;
+          dataToInsert = doubleValues;
+        } else {
+          // array of boolean
+          double[] doubleExisting = (double[])existingValues;
+          double[] doubleValues = new double[doubleExisting.length + 1];
+          for (int i = 0; i < doubleExisting.length; i++) {
+            doubleValues[i] = doubleExisting[i];
+          }
+          doubleValues[doubleValues.length - 1] = (Double)objVal;
+          dataToInsert = doubleValues;
+        } 
+      } else if (type.equals("int") || type.equals("datetime")) {
+         // check whether existingValues is a primitive type or an array
+        if (existingValues instanceof Long) {
+          long[] longValues = new long[2];
+          longValues[0] = (Long)existingValues;
+          longValues[1] = (Long)objVal;
+          dataToInsert = longValues;
+        } else {
+          // array of boolean
+          long[] longExisting = (long[])existingValues;
+          long[] longValues = new long[longExisting.length + 1];
+          for (int i = 0; i < longExisting.length; i++) {
+            longValues[i] = longExisting[i];
+          }
+          longValues[longValues.length - 1] = (Long)objVal;
+          dataToInsert = longValues;
+        } 
+      } else {
+        // check whether existingValues is a primitive type or an array
+        if (existingValues instanceof String) {
+          String[] stringValues = new String[2];
+          stringValues[0] = (String)existingValues;
+          stringValues[1] = (String)objVal;
+          dataToInsert = stringValues;
+        } else {
+          // array of boolean
+          String[] stringExisting = (String[])existingValues;
+          String[] stringValues = new String[stringExisting.length + 1];
+          for (int i = 0; i < stringExisting.length; i++) {
+            stringValues[i] = stringExisting[i];
+          }
+          stringValues[stringValues.length - 1] = (String)objVal;
+          dataToInsert = stringValues;
+        } 
+      }
+      nodeProps.put(r.getId(), dataToInsert);
+    }
     db.setNodeProperties(subId, nodeProps);
   }
 
   /**
-   * create neo4j node with label "Entity"
+   * Creates neo4j node with label "Entity".
    * @param resource either subject or object
    * @return nodeId an automatically generated id once a node is stored in noe4j DB
    * 
@@ -169,8 +267,9 @@ public class Neo4jBatchHandler {
     db.setNodeLabels(nodeId, labels.toArray(new Label[labels.size()]));
     return nodeId;
   }
+  
   /**
-   * create neo4j relationship between two nodes
+   * Creates neo4j relationship between two nodes.
    * @param predicateResource predicate
    * @param subjectNodeId subject node id
    * @param objectNodeId object node id

@@ -8,14 +8,14 @@ import java.util.Map;
 
 public class Main {
   /**
-   * main method
+   * main method.
    * @param args arg1 is the path to Freebase dump, arg2 is the path to store noe4j DB,
    *     arg3 is the number of triples to read (optional)
    */
   public static void main(String[] args) {
     if (args.length < 2) {
-      System.err.println("Usage: de.mpii.d5.neo4j.Main freebasePath "
-          + "noe4jDatabaseDir [#triples]");
+      System.err.println("Usage: main.java.de.mpii.d5.neo4j freebasePath "
+          + "neo4jDatabaseDir [#triples]");
     }
 
     String freebasePath = args[0];

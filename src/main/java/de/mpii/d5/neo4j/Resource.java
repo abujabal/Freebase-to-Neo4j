@@ -12,8 +12,6 @@ import java.util.regex.Pattern;
 public class Resource {
   // non-string literal e.g., int, double and boolean
   private static final Pattern NON_STRING_LIT = Pattern.compile("\"([^\"]+)\"\\^\\^([^:]+):(\\w+)");
-  // string literal
-  private static final Pattern STRING_LIT = Pattern.compile("\"([^\"]+)\"@(\\w+)");
   private String value;
   private String id;
   private String prefix;
@@ -29,8 +27,9 @@ public class Resource {
   public void setValue(String value) {
     this.value = value;
   }
+  
   /**
-   * split value into prefix and id
+   * Splits value into prefix and id.
    */
   public void setValues() {
     if (this.getValue().contains(":")) {
@@ -39,8 +38,9 @@ public class Resource {
       this.id = this.getValue().substring(endIndex + 1, this.getValue().length());
     }
   }
+  
   /**
-   * check whether a resource is literal
+   * Checks whether a resource is literal or not.
    * @return boolean
    */
   public boolean isLiteral() {
@@ -49,24 +49,31 @@ public class Resource {
     }
     return false;
   }
+  
   /**
-   * get value out of literal resource
+   * get value out of literal resource.
    * @return the value of literal resource
    */
-  public String handleLiteral() {
+  public String normalizeLiteral() {
     String val = "";
+    String type = "";
     Matcher m = NON_STRING_LIT.matcher(this.getValue());
-    Matcher m2 = STRING_LIT.matcher(this.getValue());
     if (m.matches()) {
       // int, double, boolean, or datetime, example: "true"^^xsd:boolean
       val = m.group(1);
-    } else if (m2.matches()) {
-      // string, example: "abdalghani"@en
-      val = m2.group(1);
+      type = m.group(3);
+      if (type.equals("datetime")) {
+        val = normalizeDate(val);
+      }
+      
+    } else {
+      int atIndex = this.getValue().lastIndexOf('@');
+      val = this.getValue().substring(1, atIndex - 1);
+      type = "string";
     }
-    // insert escape chars
+    
     val = val.replace("\\u", "\\\\u");
-    return val;
+    return val + ":@:" + type;
   }
   
   public String getId() {
@@ -75,5 +82,31 @@ public class Resource {
   
   public String getPrefix() {
     return prefix;
+  }
+  
+  /**
+   * Since Neo4j does not support date datatype. This method converts a date into a long number.
+   * It is a workaround which would work when comparing dates.
+   * @param val Unnormalized date e.g., 2015-10-02
+   * @return Normalized date
+   */
+  private String normalizeDate(String val) {
+    String newVal = "";
+    if (val.startsWith("T")) {
+      newVal = val.substring(1, val.length()).replace(":", "").replace("Z", ""); 
+    } else {
+      if (val.contains("T")) {
+        val = val.split("T")[0];
+      }
+      if (val.contains("-")) {
+        String[] parts = val.split("-");
+        for (String part : parts) {
+          newVal += part;   
+        }
+      } else {
+        newVal = val;
+      }  
+    }
+    return newVal.trim();
   }
 }
